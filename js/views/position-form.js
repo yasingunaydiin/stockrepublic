@@ -26,8 +26,9 @@ function posForm(sym, locked) {
       <label class="field">Number of shares<input id="pfShares" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g. 1.05" value="${p ? +p.shares.toFixed(6) : ""}"></label>
       <label class="field">Total invested (€)<input id="pfTotal" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g. 200" value="${p ? +(p.shares * p.avg).toFixed(2) : ""}"></label>
       <label class="field">Avg. buy price per share (€)<input id="pfAvg" type="number" inputmode="decimal" step="any" min="0" placeholder="e.g. 188.50" value="${p ? +p.avg.toFixed(4) : ""}"></label>
+      <label class="field">${p?.buys?.length > 1 ? "First bought (optional)" : "Date bought (optional)"}<input id="pfBuyDate" type="date" max="${todayStr()}" value="${p?.buys?.[0]?.date || ""}"></label>
     </div>
-    <p class="hint" data-mode="shares" ${mode !== "shares" ? "hidden" : ""}>Copy these from Trade Republic: tap the stock in your portfolio. Fill in any two and the third is calculated. ${priceHint(sym)}</p>
+    <p class="hint" data-mode="shares" ${mode !== "shares" ? "hidden" : ""}>Copy these from Trade Republic: tap the stock in your portfolio. Fill in any two and the third is calculated. Add the date to see your purchase as a dot on the chart. ${priceHint(sym)}</p>
     <p class="hint" id="pfPreview"></p>
     <div class="form-actions"><button class="btn" type="submit" id="pfSubmit">${submitLabel(mode, p)}</button>
       ${p || locked ? `<button class="btn ghost" type="button" data-cancel>Cancel</button>` : ""}
@@ -93,7 +94,7 @@ async function submitPosition(form) {
   if (sym === "__other") sym = form.querySelector("#pfTicker").value.trim().toUpperCase();
   if (!sym) return msg.textContent = "Choose a company first.";
   const existing = state.portfolio.find(p => p.symbol === sym);
-  let shares, avg;
+  let shares, avg, buys = existing?.buys || [];
   if (mode === "amount") {
     const amount = num("#pfAmount"), date = form.querySelector("#pfDate").value;
     if (!(amount > 0)) return msg.textContent = "Enter how much you invested in euros, for example 200.";
@@ -106,6 +107,7 @@ async function submitPosition(form) {
     try { px = await priceOn(sym, date); } catch {}
     if (!px) return msg.textContent = "Couldn't get the price for that day. Try another date, or enter your shares instead.";
     shares = amount / px; avg = px;
+    buys = [...buys, { date: date || todayStr(), shares, price: px }].sort((a, b) => a.date.localeCompare(b.date));
     // Buying more of something you own: combine into one position with a new average price.
     if (existing) { avg = (existing.shares * existing.avg + amount) / (existing.shares + shares); shares += existing.shares; }
   } else {
@@ -115,11 +117,16 @@ async function submitPosition(form) {
     if (!(shares > 0)) return msg.textContent = "Enter how many shares you own, for example 1.05.";
     if (!(avg > 0) && total > 0) avg = total / shares;
     if (!(avg > 0)) return msg.textContent = "Enter the total you invested or your average buy price per share.";
+    const buyDate = form.querySelector("#pfBuyDate").value;
+    if (buyDate > todayStr()) return msg.textContent = "The date can't be in the future.";
+    // A changed date turns the position into a single purchase on that day; an untouched one keeps the purchase history.
+    if (buyDate !== (buys[0]?.date || "")) buys = buyDate ? [{ date: buyDate, shares, price: avg }] : [];
     try { await ensureQuote(sym); } catch {
       return msg.textContent = `Couldn't find “${sym}”. Use the Yahoo Finance code, e.g. EUNL.DE for the iShares MSCI World ETF.`;
     }
   }
   const entry = { symbol: sym, name: companyFor(sym).name !== sym ? companyFor(sym).name : state.overview[sym]?.name || sym, shares, avg };
+  if (buys.length) entry.buys = buys;
   const i = state.portfolio.findIndex(p => p.symbol === sym);
   if (i >= 0) state.portfolio[i] = entry; else state.portfolio.push(entry);
   save("portfolio", state.portfolio);

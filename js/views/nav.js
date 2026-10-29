@@ -17,7 +17,7 @@ function renderChips() {
 
 function renderHead() {
   const heads = {
-    discover: `<div><h1>Discover</h1><p>72 well-known companies in six sectors, with the last month's move. Tap a company for its full chart, explained in plain language.</p></div>
+    discover: `<div><h1>Discover</h1><p>${COMPANIES.length} well-known companies in six sectors, with the last month's move. Tap a company for its full chart, explained in plain language.</p></div>
       <input class="search" id="search" type="search" placeholder="Search company" aria-label="Search company" value="${esc(state.query)}">`,
     portfolio: `<div><h1>Portfolio</h1><p>What you've invested through Trade Republic, and what it's worth today.</p></div>`,
     watch: `<div><h1>Watchlist</h1><p>Companies you're keeping an eye on. Tap ☆ on any company to add it.</p></div>`,

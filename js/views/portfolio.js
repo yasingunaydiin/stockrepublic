@@ -81,7 +81,7 @@ function portfolioView() {
 
 function renderPortfolio() {
   // Keep anything typed into the form when prices arrive and the view redraws.
-  const ids = ["pfSymbol", "pfTicker", "pfAmount", "pfDate", "pfShares", "pfTotal", "pfAvg"];
+  const ids = ["pfSymbol", "pfTicker", "pfAmount", "pfDate", "pfShares", "pfTotal", "pfAvg", "pfBuyDate"];
   const typed = ids.map(id => document.getElementById(id)?.value);
   const wrapHidden = document.getElementById("pfTickerWrap")?.hidden;
   const mode = document.querySelector('input[name="pfMode"]:checked')?.value;

@@ -1,6 +1,6 @@
 // The interactive price chart.
 
-function drawChart(points, cur, range, up, buy) {
+function drawChart(points, cur, range, up, buy, buyDates = []) {
   const el = $("#chart"), W = el.clientWidth, H = el.clientHeight;
   const pad = { l: 8, r: 64, t: 12, b: 26 };
   const xs = points.map(p => p[0]), ys = points.map(p => norm(cur, p[1]));
@@ -27,6 +27,15 @@ function drawChart(points, cur, range, up, buy) {
     xl += `<text x="${X(i)}" y="${H - 6}" font-size="11" fill="var(--muted)" text-anchor="${k === 0 ? "start" : k === n - 1 ? "end" : "middle"}">${lbl}</text>`;
   }
   const line = ys.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(" L");
+  // A dot on the bar that contains each purchase day. Skipped on 1D, which only covers today's trading.
+  const bought = new Set(range === "1d" ? [] : buyDates.map(date => {
+    const end = new Date(date + "T23:59:59").getTime() / 1000;
+    if (end < xs[0]) return -1;
+    let i = 0;
+    while (i + 1 < xs.length && xs[i + 1] <= end) i++;
+    return i;
+  }).filter(i => i >= 0));
+  const dots = [...bought].map(i => `<circle cx="${X(i)}" cy="${Y(ys[i])}" r="5.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`).join("");
   el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Price chart">
     <defs><linearGradient id="fill" x1="0" x2="0" y1="0" y2="1">
       <stop offset="0" stop-color="${up ? "var(--up)" : "var(--down)"}" stop-opacity=".22"/>
@@ -37,6 +46,7 @@ function drawChart(points, cur, range, up, buy) {
     <circle cx="${X(ys.length - 1)}" cy="${Y(ys.at(-1))}" r="4" fill="${color}"/>
     ${showBuy ? `<line x1="${pad.l}" x2="${W - pad.r}" y1="${Y(buy)}" y2="${Y(buy)}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="6 4"/>
       <text x="${pad.l + 4}" y="${Y(buy) - 6}" font-size="11" font-weight="600" fill="var(--accent)">Your avg. buy price ≈ ${sym.trim()}${buy.toLocaleString("en-US", { maximumFractionDigits: 2 })}</text>` : ""}
+    ${dots}
     <g id="cross" visibility="hidden"><line id="cl" y1="${pad.t}" y2="${H - pad.b}" stroke="var(--muted)" stroke-dasharray="3 3"/>
       <circle id="cc" r="5" fill="var(--surface)" stroke="${color}" stroke-width="2"/></g>
   </svg><div class="tip" id="tip" hidden></div>`;
@@ -50,7 +60,8 @@ function drawChart(points, cur, range, up, buy) {
     $("#cc").setAttribute("cx", cx); $("#cc").setAttribute("cy", cy);
     const fromStart = (ys[i] / ys[0] - 1) * 100;
     tip.hidden = false;
-    tip.innerHTML = `<b>${money(points[i][1], cur)}</b> · ${fmtDate(xs[i], range)} · ${pct(fromStart)} from start`;
+    const nearBuy = [...bought].some(b => Math.abs(X(b) - cx) <= 6);
+    tip.innerHTML = `<b>${money(points[i][1], cur)}</b> · ${fmtDate(xs[i], range)} · ${pct(fromStart)} from start${nearBuy ? " · <b>You bought here</b>" : ""}`;
     tip.style.left = Math.max(110, Math.min(W - 110, cx)) + "px";
     tip.style.top = cy + "px";
   };

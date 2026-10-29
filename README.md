@@ -9,7 +9,7 @@
 
 # Stock Republic
 
-A personal stock explorer for 72 well-known companies across six sectors: Software, Semiconductors, Pharma, Consumer staples, Luxury & consumer, and Banks.
+A personal stock explorer for 74 well-known companies across six sectors: Big Tech & software, Semiconductors, Pharma, Consumer staples, Luxury & consumer, and Banks.
 
 - **Discover:** each company's last month at a glance, plus each sector's average move.
 - **Charts:** click any company for its price history (1 day to max), explained in plain language: biggest drop, how much the price swings, where it sits in its 52-week range.

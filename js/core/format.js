@@ -21,6 +21,8 @@ const tone = v => v >= 0 ? "gain" : "loss";
 const fmtShares = n => (+n).toLocaleString("en-US", { maximumFractionDigits: 4 });
 
 const todayStr = () => new Date().toLocaleDateString("en-CA");
+// "2026-10-27" → "27 Oct 2026"
+const fmtDay = s => new Date(s + "T12:00:00").toLocaleDateString([], { day: "numeric", month: "short", year: "numeric" });
 
 function fmtDate(t, range) {
   const d = new Date(t * 1000);

@@ -81,7 +81,9 @@ function renderPosition() {
     <div class="stat"><dt>Invested</dt><dd>${eur(r.invested)}</dd></div>
     <div class="stat"><dt>Worth now</dt><dd>${eur(r.value)}</dd></div>
     <div class="stat"><dt>Gain / loss</dt><dd class="${tone(r.gain)}">${eur(r.gain, true)} (${pct(r.gainPct)})</dd></div>
-    <button class="mini" data-addpos style="margin-left:auto">Edit or buy more</button></div>`;
+    ${p.buys?.length ? `<div class="stat"><dt>${p.buys.length > 1 ? "First bought" : "Bought"}</dt><dd>${fmtDay(p.buys[0].date)}</dd></div>` : ""}
+    <button class="mini" data-addpos style="margin-left:auto">Edit or buy more</button></div>
+    ${p.buys?.length ? "" : `<p class="hint" style="margin:10px 0 0">Add the date you bought it (Edit → Correct shares &amp; price) to see it as a dot on the chart.</p>`}`;
 }
 
 function renderDetail() {
@@ -101,7 +103,7 @@ function renderDetail() {
   // Your average buy price, converted from euros into the chart's currency.
   const own = state.portfolio.find(p => p.symbol === c.symbol);
   const rate = state.fx[cur === "GBp" ? "GBP" : cur];
-  drawChart(d.points, cur, range, a.change >= 0, own && rate ? own.avg / rate : null);
+  drawChart(d.points, cur, range, a.change >= 0, own && rate ? own.avg / rate : null, (own?.buys || []).map(b => b.date));
   renderPosition();
 
   const pos = d.high52 > d.low52 ? Math.min(100, Math.max(0, (d.price - d.low52) / (d.high52 - d.low52) * 100)) : 50;

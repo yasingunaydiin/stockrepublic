@@ -1,8 +1,8 @@
 // The six sectors, plus a catch-all for stocks outside the list.
 
 const SECTORS = [
-  { id: "software", name: "Software", color: "#3b6fd4", trait: "Growth",
-    blurb: "Programs and cloud services that businesses pay for every year. Often high growth, and prices can swing a lot when expectations change." },
+  { id: "software", name: "Big Tech & software", color: "#3b6fd4", trait: "Growth",
+    blurb: "The world's largest tech companies: devices, online platforms, cloud and business software. Often high growth, and prices can swing a lot when expectations change." },
   { id: "semis", name: "Semiconductors", color: "#7b52c9", trait: "Cyclical",
     blurb: "Chips and the machines that make them. Booming with AI, but the industry moves in cycles, so big rises and big falls both happen." },
   { id: "pharma", name: "Pharma", color: "#14907a", trait: "Defensive",
