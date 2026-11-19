@@ -33,9 +33,34 @@ async function fetchQuotes(syms) {
   return !failed;
 }
 
+// Search Yahoo for stocks that aren't in the Discover list.
+let searchTimer;
+function searchMarket(q) {
+  clearTimeout(searchTimer);
+  state.results = []; state.searching = false;
+  if (q.length < 2) return;
+  state.searching = true;
+  searchTimer = setTimeout(async () => {
+    let list = [];
+    try {
+      const d = await (await fetch(`${API}/api/search?q=${encodeURIComponent(q)}`)).json();
+      list = d.results || [];
+    } catch {}
+    if (q !== state.query) return;
+    list = list.filter(r => !COMPANIES.some(c => c.symbol === r.symbol));
+    for (const r of list) state.found[r.symbol] = { sector: "other", symbol: r.symbol, name: r.name, country: "",
+      about: `${r.type === "ETF" ? "Fund" : "Stock"} listed on ${r.exchange || "an exchange"}.` };
+    state.results = list.map(r => r.symbol);
+    state.searching = false;
+    renderMain();
+    const need = state.results.filter(s => !state.overview[s]);
+    if (need.length) fetchQuotes(need);
+  }, 350);
+}
+
 async function loadOverview() {
   // Currency rates first, so portfolio values in euros are ready early.
-  const extra = state.portfolio.map(p => p.symbol).filter(s => !COMPANIES.some(c => c.symbol === s));
+  const extra = [...state.portfolio.map(p => p.symbol), ...state.watch].filter(s => !COMPANIES.some(c => c.symbol === s));
   const ok = await fetchQuotes([...Object.values(FX), ...extra, ...COMPANIES.map(c => c.symbol)]);
   const failed = !ok;
   $("#status").textContent = failed

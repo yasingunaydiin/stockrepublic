@@ -59,6 +59,17 @@ def fetch_chart(symbol, rng):
     return data
 
 
+def search_symbols(query):
+    url = "https://query1.finance.yahoo.com/v1/finance/search?" + urllib.parse.urlencode(
+        {"q": query[:40], "quotesCount": 8, "newsCount": 0, "listsCount": 0})
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        raw = json.load(resp)
+    return [{"symbol": x["symbol"], "name": x.get("longname") or x.get("shortname") or x["symbol"],
+             "type": x["quoteType"], "exchange": x.get("exchDisp")}
+            for x in raw.get("quotes", []) if x.get("quoteType") in ("EQUITY", "ETF") and x.get("symbol")]
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
@@ -80,6 +91,11 @@ class Handler(SimpleHTTPRequestHandler):
         if url.path == "/api/chart":
             try:
                 self.send_json(200, fetch_chart(q["symbol"][0], q.get("range", ["1y"])[0]))
+            except Exception as e:
+                self.send_json(502, {"error": str(e)})
+        elif url.path == "/api/search":
+            try:
+                self.send_json(200, {"results": search_symbols(q.get("q", [""])[0])})
             except Exception as e:
                 self.send_json(502, {"error": str(e)})
         elif url.path == "/api/overview":

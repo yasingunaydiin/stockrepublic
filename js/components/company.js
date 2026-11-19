@@ -1,7 +1,7 @@
 // Building blocks for showing a company: avatar, sparkline, list row.
 
 function companyFor(sym) {
-  return COMPANIES.find(c => c.symbol === sym) || {
+  return COMPANIES.find(c => c.symbol === sym) || state.known[sym] || state.found[sym] || {
     sector: "other", symbol: sym, country: "", about: "",
     name: state.portfolio.find(p => p.symbol === sym)?.name || state.overview[sym]?.name || sym };
 }

@@ -26,5 +26,10 @@ function discoverView() {
     blocks += `<section class="block"><div class="block-head"><h2>${s.name}<span class="trait">${s.trait}</span></h2>
       <p>${s.blurb}</p></div>${list.map(row).join("")}</section>`;
   }
-  return html + (blocks ? `<div class="lists">${blocks}</div>` : `<p class="empty">No company matches “${esc(state.query)}”.</p>`);
+  if (q && state.results.length) {
+    blocks += `<section class="block"><div class="block-head"><h2>More from the market</h2>
+      <p>Not in the list above. Tap ☆ to add one to your watchlist, and again to remove it.</p></div>${state.results.map(s => row(companyFor(s))).join("")}</section>`;
+  }
+  const none = state.searching ? `<p class="empty">Searching…</p>` : `<p class="empty">No company matches “${esc(state.query)}”.</p>`;
+  return html + (blocks ? `<div class="lists">${blocks}</div>${state.searching ? none : ""}` : none);
 }

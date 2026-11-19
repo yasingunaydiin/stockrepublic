@@ -5,7 +5,7 @@ $("#tabs").addEventListener("click", e => {
 });
 $("#pfSummary").addEventListener("click", () => setView("portfolio"));
 $("#pageHead").addEventListener("input", e => {
-  if (e.target.id === "search") { state.query = e.target.value.trim(); renderMain(); }
+  if (e.target.id === "search") { state.query = e.target.value.trim(); searchMarket(state.query); renderMain(); }
 });
 document.addEventListener("submit", e => {
   if (e.target.id === "posForm") { e.preventDefault(); submitPosition(e.target); }

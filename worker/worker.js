@@ -52,6 +52,19 @@ function json(status, body) {
   });
 }
 
+async function searchSymbols(query) {
+  const url = "https://query1.finance.yahoo.com/v1/finance/search?" + new URLSearchParams(
+    { q: query.slice(0, 40), quotesCount: "8", newsCount: "0", listsCount: "0" });
+  const resp = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0" },
+    cf: { cacheEverything: true, cacheTtlByStatus: { "200-299": CACHE_SECONDS, "400-599": 0 } },
+  });
+  if (!resp.ok) throw new Error("HTTP Error " + resp.status);
+  const raw = await resp.json();
+  return (raw.quotes || []).filter(x => ["EQUITY", "ETF"].includes(x.quoteType) && SYMBOL.test(x.symbol || ""))
+    .map(x => ({ symbol: x.symbol, name: x.longname || x.shortname || x.symbol, type: x.quoteType, exchange: x.exchDisp }));
+}
+
 export default {
   async fetch(request) {
     const url = new URL(request.url);
@@ -59,6 +72,13 @@ export default {
     if (url.pathname === "/api/chart") {
       try {
         return json(200, await fetchChart(q.get("symbol") || "", q.get("range") || "1y"));
+      } catch (e) {
+        return json(502, { error: e.message });
+      }
+    }
+    if (url.pathname === "/api/search") {
+      try {
+        return json(200, { results: await searchSymbols(q.get("q") || "") });
       } catch (e) {
         return json(502, { error: e.message });
       }
