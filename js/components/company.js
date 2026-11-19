@@ -3,6 +3,9 @@
 // Stocks you added yourself and put under one of the six sectors.
 function addedCompanies() { return Object.values(state.known).filter(c => SECTORS.some(s => s.id === c.sector)); }
 
+// Everything shown on Discover: the built-in list minus what you removed, plus what you added.
+function listed() { return [...COMPANIES.filter(c => !state.hidden.has(c.symbol)), ...addedCompanies()]; }
+
 function companyFor(sym) {
   return COMPANIES.find(c => c.symbol === sym) || state.known[sym] || state.found[sym] || {
     sector: "other", symbol: sym, country: "", about: "",

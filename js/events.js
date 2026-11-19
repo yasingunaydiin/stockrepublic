@@ -45,6 +45,7 @@ $("#main").addEventListener("keydown", e => {
 });
 $("#scrim").addEventListener("click", e => {
   if (e.target.id === "scrim" || e.target.closest("#closeBtn")) return closeDetail();
+  if (e.target.closest("[data-togglehide]")) return toggleHide();
   if (e.target.closest("[data-sort]")) return sortStock($("#sortSector").value);
   if (e.target.closest("[data-unsort]")) return unsortStock();
   if (e.target.closest("#watchBtn")) return toggleWatch(detail.company.symbol);

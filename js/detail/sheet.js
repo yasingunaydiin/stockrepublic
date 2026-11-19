@@ -37,13 +37,24 @@ function closeDetail() { $("#scrim").hidden = true; $("#scrim").innerHTML = ""; 
 // Lets you file a stock under a Discover sector (or take it out again).
 function renderListPanel() {
   const p = $("#listPanel"), sym = detail.company.symbol;
-  if (COMPANIES.some(c => c.symbol === sym)) { p.hidden = true; return; }
   p.hidden = false;
+  if (COMPANIES.some(c => c.symbol === sym)) {
+    const off = state.hidden.has(sym);
+    p.innerHTML = `<span>${off ? "Removed from Discover" : "Shown on Discover"}</span><button class="chip" data-togglehide style="margin-left:auto">${off ? "Restore" : "Remove from Discover"}</button>`;
+    return;
+  }
   const cur = SECTORS.find(s => s.id === state.known[sym]?.sector);
   p.innerHTML = cur
     ? `<span>In Discover under <b>${cur.name}</b></span><button class="chip" data-unsort style="margin-left:auto">Remove from Discover</button>`
     : `<span>Add to Discover under</span><select id="sortSector" aria-label="Sector">${SECTORS.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}</select>
        <button class="chip" data-sort style="margin-left:auto">Add</button>`;
+}
+
+function toggleHide() {
+  const sym = detail.company.symbol;
+  state.hidden.has(sym) ? state.hidden.delete(sym) : state.hidden.add(sym);
+  save("hidden", [...state.hidden]);
+  renderListPanel(); renderMain();
 }
 
 function sortStock(sectorId) {

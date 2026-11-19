@@ -10,4 +10,4 @@ function save(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch 
 
 const state = { view: load("view", "discover"), filter: "all", query: "", overview: {}, watch: new Set(load("watch", [])),
   portfolio: load("portfolio", []), fx: { EUR: 1 }, editing: null,
-  known: load("known", {}), found: {}, results: [], searching: false };
+  known: load("known", {}), hidden: new Set(load("hidden", [])), found: {}, results: [], searching: false };

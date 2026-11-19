@@ -47,7 +47,7 @@ function searchMarket(q) {
       list = d.results || [];
     } catch {}
     if (q !== state.query) return;
-    list = list.filter(r => ![...COMPANIES, ...addedCompanies()].some(c => c.symbol === r.symbol));
+    list = list.filter(r => !listed().some(c => c.symbol === r.symbol));
     for (const r of list) state.found[r.symbol] = { sector: "other", symbol: r.symbol, name: r.name, country: "",
       about: `${r.type === "ETF" ? "Fund" : "Stock"} listed on ${r.exchange || "an exchange"}.` };
     state.results = list.map(r => r.symbol);
