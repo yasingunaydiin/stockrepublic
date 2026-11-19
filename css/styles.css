@@ -211,3 +211,4 @@ form.pos h3 { margin: 0; }
 }
 @media (max-width: 420px) { .row { grid-template-columns: 34px minmax(0, 1fr) 84px 24px; } .row svg { display: none; } .row > .row-spark { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.tr select { font: 14px var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }

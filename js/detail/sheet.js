@@ -20,10 +20,12 @@ function openDetail(sym) {
     <div class="panel story" id="story"></div>
     <div class="panel tr"><span>Find it in Trade Republic: search</span><code>${esc(c.name)}</code>
       <button class="chip" id="watchBtn" style="margin-left:auto"></button></div>
+    <div class="panel tr" id="listPanel"></div>
   </div></div>`;
   $("#scrim").hidden = false;
   document.body.style.overflow = "hidden";
   syncWatchBtn();
+  renderListPanel();
   renderRanges();
   renderPosition();
   loadDetail();
@@ -31,6 +33,36 @@ function openDetail(sym) {
 }
 
 function closeDetail() { $("#scrim").hidden = true; $("#scrim").innerHTML = ""; document.body.style.overflow = ""; detail.company = null; }
+
+// Lets you file a stock under a Discover sector (or take it out again).
+function renderListPanel() {
+  const p = $("#listPanel"), sym = detail.company.symbol;
+  if (COMPANIES.some(c => c.symbol === sym)) { p.hidden = true; return; }
+  p.hidden = false;
+  const cur = SECTORS.find(s => s.id === state.known[sym]?.sector);
+  p.innerHTML = cur
+    ? `<span>In Discover under <b>${cur.name}</b></span><button class="chip" data-unsort style="margin-left:auto">Remove from Discover</button>`
+    : `<span>Add to Discover under</span><select id="sortSector" aria-label="Sector">${SECTORS.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}</select>
+       <button class="chip" data-sort style="margin-left:auto">Add</button>`;
+}
+
+function sortStock(sectorId) {
+  const sym = detail.company.symbol;
+  state.known[sym] = { ...companyFor(sym), sector: sectorId };
+  finishSort(sym);
+}
+
+function unsortStock() {
+  const sym = detail.company.symbol;
+  if (state.watch.has(sym)) state.known[sym] = { ...state.known[sym], sector: "other" }; else delete state.known[sym];
+  finishSort(sym);
+}
+
+function finishSort(sym) {
+  save("known", state.known);
+  detail.company = companyFor(sym);
+  renderListPanel(); renderMain();
+}
 
 function syncWatchBtn() {
   const b = $("#watchBtn"); if (!b) return;

@@ -47,7 +47,7 @@ function searchMarket(q) {
       list = d.results || [];
     } catch {}
     if (q !== state.query) return;
-    list = list.filter(r => !COMPANIES.some(c => c.symbol === r.symbol));
+    list = list.filter(r => ![...COMPANIES, ...addedCompanies()].some(c => c.symbol === r.symbol));
     for (const r of list) state.found[r.symbol] = { sector: "other", symbol: r.symbol, name: r.name, country: "",
       about: `${r.type === "ETF" ? "Fund" : "Stock"} listed on ${r.exchange || "an exchange"}.` };
     state.results = list.map(r => r.symbol);
@@ -60,7 +60,7 @@ function searchMarket(q) {
 
 async function loadOverview() {
   // Currency rates first, so portfolio values in euros are ready early.
-  const extra = [...state.portfolio.map(p => p.symbol), ...state.watch].filter(s => !COMPANIES.some(c => c.symbol === s));
+  const extra = [...state.portfolio.map(p => p.symbol), ...state.watch, ...Object.keys(state.known)].filter(s => !COMPANIES.some(c => c.symbol === s));
   const ok = await fetchQuotes([...Object.values(FX), ...extra, ...COMPANIES.map(c => c.symbol)]);
   const failed = !ok;
   $("#status").textContent = failed

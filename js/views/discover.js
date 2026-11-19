@@ -2,7 +2,7 @@
 
 function sectorTiles() {
   return `<div class="sectors" role="group" aria-label="Filter by sector">${SECTORS.map(s => {
-    const ms = COMPANIES.filter(c => c.sector === s.id).map(c => monthEUR(c.symbol)).filter(Boolean);
+    const ms = [...COMPANIES, ...addedCompanies()].filter(c => c.sector === s.id).map(c => monthEUR(c.symbol)).filter(Boolean);
     const avg = ms.length ? ms.reduce((a, m) => a + m.chg, 0) / ms.length : null;
     return `<button class="sector-tile" data-sector="${s.id}" aria-pressed="${state.filter === s.id}" style="--c:${s.color}">
       <span class="dot"></span><span class="label">${s.name}</span>
@@ -21,7 +21,7 @@ function discoverView() {
   let blocks = "";
   for (const s of SECTORS) {
     if (state.filter !== "all" && state.filter !== s.id) continue;
-    const list = COMPANIES.filter(c => c.sector === s.id && match(c));
+    const list = [...COMPANIES, ...addedCompanies()].filter(c => c.sector === s.id && match(c));
     if (!list.length) continue;
     blocks += `<section class="block"><div class="block-head"><h2>${s.name}<span class="trait">${s.trait}</span></h2>
       <p>${s.blurb}</p></div>${list.map(row).join("")}</section>`;

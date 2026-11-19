@@ -1,5 +1,8 @@
 // Building blocks for showing a company: avatar, sparkline, list row.
 
+// Stocks you added yourself and put under one of the six sectors.
+function addedCompanies() { return Object.values(state.known).filter(c => SECTORS.some(s => s.id === c.sector)); }
+
 function companyFor(sym) {
   return COMPANIES.find(c => c.symbol === sym) || state.known[sym] || state.found[sym] || {
     sector: "other", symbol: sym, country: "", about: "",

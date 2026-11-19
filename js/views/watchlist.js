@@ -25,11 +25,14 @@ function watchlistView() {
 }
 
 function toggleWatch(sym) {
-  if (state.watch.has(sym)) state.watch.delete(sym);
+  if (state.watch.has(sym)) {
+    state.watch.delete(sym);
+    if (state.known[sym]?.sector === "other") { delete state.known[sym]; save("known", state.known); }
+  }
   else {
     state.watch.add(sym);
     const f = state.found[sym];
-    if (f) { state.known[sym] = f; save("known", state.known); }
+    if (f && !state.known[sym]) { state.known[sym] = f; save("known", state.known); }
     if (!state.overview[sym]) fetchQuotes([sym]);
   }
   save("watch", [...state.watch]);
